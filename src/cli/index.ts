@@ -16,6 +16,9 @@ export const spawnDevMode = async () => {
 	const suffix = process.platform === 'win32' ? '.cmd' : '';
 	const executor = `npx${suffix}`;
 
+	// eslint-disable-next-line no-console
+	console.log(resolve());
+
 	const wrangler = spawn(
 		executor,
 		['wrangler', 'pages', 'dev', resolve(__dirname, 'template'), '--port=8799', ...passThroughArgs],
