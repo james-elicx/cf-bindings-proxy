@@ -1,0 +1,49 @@
+name: Pre-Release
+
+# Adapted from the following workflow:
+# https://github.com/cloudflare/next-on-pages/blob/main/.github/workflows/create-pullrequest-prerelease.yml
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  publish:
+    name: Publish Pre-Release to Internal Registry
+    if: ${{ github.repository_owner == 'james-elicx' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Set outputs
+        id: hash
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Alter version
+        run: npm run alter-version ${{ steps.hash.outputs.sha_short }} PR=${{ github.event.number }}
+
+      - name: Build
+        run: npm run build
+
+      - name: Package
+        run: |
+          cd dist
+          npm pack
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-package-cf-bindings-proxy-${{ github.event.number }} # encode the PR number into the artifact name
+          path: dist/cf-bindings-proxy-*.tgz

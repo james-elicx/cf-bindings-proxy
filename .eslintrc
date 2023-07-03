@@ -1,0 +1,15 @@
+{
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	},
+	"extends": ["ixn"],
+	"rules": {
+		"no-restricted-syntax": "off",
+		"no-await-in-loop": "off",
+
+		"import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.spec.ts"] }],
+
+		"no-underscore-dangle": "off"
+	},
+	"ignorePatterns": ["dist", "scripts"]
+}

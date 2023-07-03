@@ -1,0 +1,62 @@
+name: Write Pre-Release Comment
+
+# Adapted from the following workflow:
+# https://github.com/cloudflare/next-on-pages/blob/main/.github/workflows/write-prerelease-comment.yml
+
+on:
+  workflow_run:
+    workflows: [Pre-Release]
+    types:
+      - completed
+
+jobs:
+  comment:
+    name: Comment on PR
+    if: ${{ github.repository_owner == 'james-elicx' && github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Put PR and workflow ID into env
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+
+            for (const artifact of allArtifacts.data.artifacts) {
+              // Extract the PR number from the artifact name
+              const match = /^npm-package-cf-bindings-proxy-(\d+)$/.exec(artifact.name);
+              if (match) {
+                require("fs").appendFileSync(
+                  process.env.GITHUB_ENV,
+                  `\nWORKFLOW_RUN_PR=${match[1]}` +
+                    `\nWORKFLOW_RUN_ID=${context.payload.workflow_run.id}`
+                );
+                break;
+              }
+            }
+
+      - name: Comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ env.WORKFLOW_RUN_PR }}
+          message: |
+            🧪 A prerelease is available for testing 🧪
+
+            <details>
+
+            You can install this latest build in your project with:
+
+            ```sh
+            npm install --save-dev https://prerelease-registry.ixion-labs.workers.dev/james-elicx/cf-bindings-proxy/runs/${{ env.WORKFLOW_RUN_ID }}/npm-package-cf-bindings-proxy-${{ env.WORKFLOW_RUN_PR }}
+            ```
+
+            Or you can immediately run this with `npx`:
+
+            ```sh
+            npx https://prerelease-registry.ixion-labs.workers.dev/james-elicx/cf-bindings-proxy/runs/${{ env.WORKFLOW_RUN_ID }}/npm-package-cf-bindings-proxy-${{ env.WORKFLOW_RUN_PR }}
+            ```
+
+            </details>

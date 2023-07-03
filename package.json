@@ -1,0 +1,61 @@
+{
+	"name": "cf-bindings-proxy",
+	"version": "0.1.0",
+	"description": "Experimental proxy for bindings in Cloudflare Pages projects",
+	"license": "MIT",
+	"author": "James",
+	"type": "module",
+	"bin": "./dist/cli/index.js",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		}
+	},
+	"publishConfig": {
+		"directory": "dist"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/james-elicx/cf-bindings-proxy"
+	},
+	"bugs": {
+		"url": "https://github.com/james-elicx/cf-bindings-proxy/issues"
+	},
+	"homepage": "https://github.com/james-elicx/cf-bindings-proxy#readme",
+	"scripts": {
+		"dev": "node ./dist/cli/index.js",
+		"build": "vite build && node ./scripts/build.js",
+		"build:watch": "npm run build --watch",
+		"lint": "eslint \"./**/*.{cjs,js,jsx,ts,tsx}\"",
+		"prettier": "prettier --ignore-unknown --ignore-path=.gitignore --check .",
+		"prettier:format": "prettier --ignore-unknown --ignore-path=.gitignore --write .",
+		"tsc": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"alter-version": "node ./scripts/alter-version.js",
+		"release": "changeset publish"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.26.2",
+		"@cloudflare/workers-types": "^4",
+		"@tsconfig/strictest": "^2.0.1",
+		"@types/node": "^20.3.3",
+		"eslint": "^8.41.0",
+		"eslint-config-ixn": "^1.4.2",
+		"nodemon": "^2.0.22",
+		"prettier": "^2.8.8",
+		"typescript": "^5.0.4",
+		"vite": "^4.3.5",
+		"vite-plugin-dts": "^2.3.0",
+		"vite-plugin-externalize-deps": "^0.6.0",
+		"vitest": "^0.31.0",
+		"vitest-environment-miniflare": "^2.14.0",
+		"wrangler": "^3.0.0"
+	},
+	"peerDependencies": {
+		"@cloudflare/workers-types": ">=4",
+		"wrangler": ">=3.0.0"
+	}
+}

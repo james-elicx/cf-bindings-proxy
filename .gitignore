@@ -1,0 +1,27 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# testing
+coverage
+.wrangler
+
+# turbo
+.turbo
+
+# build files
+dist
+custom-dist
+cf-bindings-proxy-*.tgz
+
+# log files
+*.log*
+
+# temp files
+tsconfig.tsbuildinfo
+vite.config.ts.*
+
+# Secrets
+.env*
+!.env*.example
