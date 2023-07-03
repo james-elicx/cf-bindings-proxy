@@ -4,7 +4,7 @@
   <p align="center">
     Experimental proxy for interfacing with bindings
     <br />
-    in frameworks targeting Cloudflare Pages.
+    in projects targeting Cloudflare Pages.
   </p>
 </p>
 

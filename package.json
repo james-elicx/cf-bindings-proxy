@@ -1,7 +1,7 @@
 {
 	"name": "cf-bindings-proxy",
 	"version": "0.1.0",
-	"description": "Experimental proxy for bindings in Cloudflare Pages projects",
+	"description": "Experimental proxy for interfacing with bindings in projects targeting Cloudflare Pages",
 	"license": "MIT",
 	"author": "James",
 	"type": "module",
