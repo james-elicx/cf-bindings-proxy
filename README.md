@@ -25,6 +25,20 @@ It is intended to be used for frameworks that do not support Cloudflare bindings
 
 ## Usage
 
+Add the library to your project.
+
+```sh
+npm add cf-bindings-proxy
+```
+
+In a separate terminal window, run the following command to start the proxy, passing through your bindings are arguments.
+
+```sh
+npx cf-bindings-proxy --kv=MY_KV
+```
+
+In your project's code, import the `binding` function from `cf-bindings-proxy` and use it to interact with your bindings.
+
 ```ts
 import { binding } from 'cf-bindings-proxy';
 

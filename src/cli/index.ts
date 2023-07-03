@@ -7,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const __dirname = dirname(__filename);
 
+const pad = (num: number) => (num < 10 ? `0${num}` : num);
+
 /**
  * Spawns wrangler dev mode with the binding proxy template.
  */
@@ -15,6 +17,23 @@ export const spawnDevMode = async () => {
 
 	const suffix = process.platform === 'win32' ? '.cmd' : '';
 	const executor = `npx${suffix}`;
+
+	// eslint-disable-next-line no-console
+	console.log(`
+-----------------
+Starting cf-bindings-proxy...
+
+WARNING: This is an experimental proxy for interfacing with bindings remotely.
+
+Please report any issues to https://github.com/james-elicx/cf-bindings-proxy
+-----------------
+`);
+
+	if (!passThroughArgs.includes('compatibility-date')) {
+		const date = new Date();
+		const formatted = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+		passThroughArgs.push(`--compatibility-date=${formatted}`);
+	}
 
 	const wrangler = spawn(
 		executor,
