@@ -1,5 +1,4 @@
 /// <reference types="vitest" />
-/* eslint-disable import/no-extraneous-dependencies */
 import { readdirSync, statSync } from 'fs';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
@@ -46,5 +45,6 @@ export default defineConfig({
 	],
 	test: {
 		environment: 'miniflare',
+		setupFiles: [resolve('tests', 'setup.ts')],
 	},
 });
