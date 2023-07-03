@@ -47,6 +47,16 @@ suite('bindings', () => {
 			expect(list.keys).toEqual([{ name: 'first-key' }, { name: 'second-key' }]);
 		});
 
+		test('list + get from single instance', async () => {
+			const kv = binding<KVNamespace>('KV');
+
+			const list = await kv.list();
+			expect(list.keys).toEqual([{ name: 'first-key' }, { name: 'second-key' }]);
+
+			const value = await kv.get('first-key');
+			expect(value).toEqual('first-value');
+		});
+
 		test('getWithMetadata', async () => {
 			const key = await binding<KVNamespace>('KV').getWithMetadata('first-key');
 

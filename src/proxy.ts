@@ -109,6 +109,10 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 			if (!target.__chainUntil.length) {
 				// eslint-disable-next-line no-param-reassign
 				target.__chainUntil = shouldChainUntil(prop);
+
+				// ensure the internal calls tracker is reset in case of multiple calls from single instance
+				// eslint-disable-next-line no-param-reassign
+				target.__calls = [];
 			}
 
 			// if we haven't reached the point where we should stop chaining, return a new proxy

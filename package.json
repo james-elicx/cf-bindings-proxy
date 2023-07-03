@@ -32,6 +32,7 @@
 		"prettier:format": "prettier --ignore-unknown --ignore-path=.gitignore --write .",
 		"tsc": "tsc --noEmit",
 		"test": "vitest run",
+		"test:kill": "sudo kill -9 `sudo lsof -i :8799 -t`",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"alter-version": "node ./scripts/alter-version.js",
