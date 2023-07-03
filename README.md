@@ -19,19 +19,37 @@
 
 ---
 
-## When To Use
+This library was written to accompany [`@cloudflare/next-on-pages`](https://github.com/cloudflare/next-on-pages), so that you can use bindings when developing Next.js apps locally through `next dev`.
 
-This library was written to accompany [`@cloudflare/next-on-pages`](https://github.com/cloudflare/next-on-pages), so that you can use bindings when developing Next.js apps locally through `next dev`. It is intended to be used for frameworks that do not support Cloudflare bindings in a fast HMR environment.
+It is intended to be used for frameworks that do not support Cloudflare bindings in a fast HMR environment.
+
+## Usage
+
+```ts
+import { binding } from 'cf-bindings-proxy';
+
+const value = await binding<KVNamespace>('MY_KV').get('key');
+```
 
 ## How It Works
 
-Starting the proxy spawns an instance of Wrangler using a template, passing through any commands and bindings that are supplied to the CLI.
+Starting the proxy spawns an instance of Wrangler using a template, passing through any commands and bindings that are supplied to the CLI. It uses port `8799`.
 
 In development mode, when interacting with a binding through the `binding('BINDING_NAME')` function, it sends HTTP requests to the proxy. These HTTP requests contain destructured function calls, which are then reconstructed and executed inside the proxy. The result is then returned to the client.
 
 When building for production, `binding('BINDING_NAME')` simply calls `process.env.BINDING_NAME` to retrieve the binding instead.
 
+### When It's Active
+
+Calls to `binding('BINDING_NAME')` will try to use the proxy when either of the following two conditions are met:
+
+- The `ENABLE_BINDINGS_PROXY` environment variable is set to `true`.
+  OR
+- The `DISABLE_BINDINGS_PROXY` environment variable is not set and `NODE_ENV` is set to `development`.
+
 ## Supported
+
+Note: Functionality and bindings not listed below may still work but have not been tested.
 
 #### KV
 

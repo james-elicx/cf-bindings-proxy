@@ -7,8 +7,12 @@
 		"no-restricted-syntax": "off",
 		"no-await-in-loop": "off",
 
-		"import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.spec.ts"] }],
+		"import/no-extraneous-dependencies": [
+			"error",
+			{ "devDependencies": ["**/*.spec.ts", "vite.config.ts", "tests/setup.ts"] }
+		],
 
+		"no-console": "error",
 		"no-underscore-dangle": "off"
 	},
 	"ignorePatterns": ["dist", "scripts"]
