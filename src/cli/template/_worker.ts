@@ -1,5 +1,5 @@
-import type { BindingRequest, BindingResponse, PropertyCall } from '../proxy';
-import { transformData } from '../transform';
+import type { BindingRequest, BindingResponse, PropertyCall } from '../../proxy';
+import { transformData } from '../../transform';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Env = { [key: string]: any };
