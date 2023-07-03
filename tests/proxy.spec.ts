@@ -9,7 +9,7 @@ suite('bindings', () => {
 
 	beforeAll(async () => {
 		// spawn a new dev mode worker
-		worker = await unstable_dev(resolve('src/cli/template.ts'), {
+		worker = await unstable_dev(resolve('src/cli/template/_worker.ts'), {
 			// logLevel: 'debug',
 			port: 8799,
 			compatibilityDate: '2023-05-22',
