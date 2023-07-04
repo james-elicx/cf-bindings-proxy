@@ -110,11 +110,11 @@ suite('bindings', () => {
 				`INSERT INTO comments (author, body, post_slug) VALUES ('Kristian', 'Great post!', ?);`,
 			];
 
-			const statements = insertQuery.map((query) =>
-				binding<D1Database>('D1').prepare(query).bind('hello-world'),
-			);
+			const d1 = binding<D1Database>('D1');
 
-			const result = await binding<D1Database>('D1').batch(statements);
+			const statements = insertQuery.map((query) => d1.prepare(query).bind('hello-world'));
+
+			const result = await d1.batch(statements);
 			expect(result.map((r) => r.success)).toEqual([true, true]);
 		});
 
