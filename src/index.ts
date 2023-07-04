@@ -16,7 +16,12 @@ export const binding = <T>(id: string): T => {
 		process.env.ENABLE_BINDINGS_PROXY ||
 		(!process.env.DISABLE_BINDINGS_PROXY && process.env.NODE_ENV === 'development')
 	) {
-		return createBindingProxy<T>(id);
+		return new Proxy(
+			{},
+			{
+				get: (_, prop) => createBindingProxy<T>(id)[prop as keyof T],
+			},
+		) as T;
 	}
 
 	return process.env[id] as T;
