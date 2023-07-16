@@ -1,4 +1,7 @@
 import { resolve } from 'path';
+import type { ColumnType, Generated } from 'kysely';
+import { Kysely } from 'kysely';
+import { D1Dialect } from 'kysely-d1';
 import { afterAll, beforeAll, expect, suite, test } from 'vitest';
 import type { UnstableDevWorker } from 'wrangler';
 import { unstable_dev } from 'wrangler';
@@ -149,6 +152,30 @@ suite('bindings', () => {
 
 			const total = await stmt.first('total');
 			expect(total).toEqual(3);
+		});
+
+		test('kysely -> select all', async () => {
+			type KyselyDatabase = {
+				comments: {
+					id: Generated<number>;
+					author: ColumnType<string>;
+					body: ColumnType<string>;
+					post_slug: ColumnType<string>;
+				};
+			};
+
+			const d1 = binding<D1Database>('D1');
+			const kysley = new Kysely<KyselyDatabase>({ dialect: new D1Dialect({ database: d1 }) });
+
+			const data = await kysley.selectFrom('comments').selectAll().execute();
+
+			const expected = [
+				{ id: 1, author: 'Jon', body: 'How do you use D1?', post_slug: 'd1-guide' },
+				{ id: 2, author: 'Markus', body: 'Hello there!', post_slug: 'hello-world' },
+				{ id: 3, author: 'Kristian', body: 'Great post!', post_slug: 'hello-world' },
+			];
+
+			expect(data).toEqual(expected);
 		});
 
 		test('prepare -> raw (select)', async () => {
