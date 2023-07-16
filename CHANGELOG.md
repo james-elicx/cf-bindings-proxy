@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.2.3
+
+### Patch Changes
+
+- ab8484a: Fix D1Result undefined properties returning truthy value.
+
 ## 0.2.2
 
 ### Patch Changes
