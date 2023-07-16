@@ -56,7 +56,7 @@ const createResponseProxy = <T extends object>(
 		get(_, prop) {
 			if (!data || ['then', Symbol.iterator, Symbol.toStringTag].includes(prop)) return undefined;
 
-			if (prop in data) {
+			if (prop in data || ['error', 'results'].includes(prop as string)) {
 				return data[prop as keyof typeof data];
 			}
 
