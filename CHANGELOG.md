@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.2.4
+
+### Patch Changes
+
+- 000367c: Fix retrieving undefined array value at index returning proxy func instead of undefined.
+
 ## 0.2.3
 
 ### Patch Changes
