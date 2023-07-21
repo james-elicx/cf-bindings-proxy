@@ -188,6 +188,10 @@ suite('bindings', () => {
 				['Jon', 'd1-guide'],
 				['Markus', 'hello-world'],
 			]);
+
+			expect(raw[0]).toEqual(['Jon', 'd1-guide']);
+			expect(raw[1]).toEqual(['Markus', 'hello-world']);
+			expect(raw[2]).toEqual(undefined);
 		});
 
 		test('prepare -> raw (sqlite_schema)', async () => {

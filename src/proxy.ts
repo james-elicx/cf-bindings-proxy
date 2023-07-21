@@ -60,6 +60,10 @@ const createResponseProxy = <T extends object>(
 				return data[prop as keyof typeof data];
 			}
 
+			if (Array.isArray(data) && typeof prop === 'string' && !Number.isNaN(Number(prop))) {
+				return data[Number(prop)];
+			}
+
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			const newProxy = createBindingProxy<BindingRequest>(bindingId, true);
 
