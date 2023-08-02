@@ -31,7 +31,9 @@ Please report any issues to https://github.com/james-elicx/cf-bindings-proxy
 
 	if (!passThroughArgs.includes('compatibility-date')) {
 		const date = new Date();
-		const formatted = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+		const formatted = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(
+			date.getUTCDate(),
+		)}`;
 		passThroughArgs.push(`--compatibility-date=${formatted}`);
 	}
 
