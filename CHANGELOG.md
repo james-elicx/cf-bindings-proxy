@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.2.5
+
+### Patch Changes
+
+- c55671b: [Fix] Use UTC for fallback compatibility_date
+
 ## 0.2.4
 
 ### Patch Changes
