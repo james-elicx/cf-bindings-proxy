@@ -16,6 +16,7 @@ const fetchData = async (call: BindingRequest): Promise<unknown> => {
 		resp = await fetch('http://127.0.0.1:8799', {
 			body: JSON.stringify(call),
 			method: 'POST',
+			cache: 'no-store',
 			headers: { 'Content-Type': 'application/json' },
 		});
 	} catch (e) {
