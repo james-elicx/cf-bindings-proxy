@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.2.6
+
+### Patch Changes
+
+- 38c1ac9: Make the cache option always be no-store
+
 ## 0.2.5
 
 ### Patch Changes
