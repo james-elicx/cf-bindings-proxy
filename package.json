@@ -29,7 +29,7 @@
 		"build:watch": "npm run build --watch",
 		"lint": "eslint \"./**/*.{cjs,js,jsx,ts,tsx}\"",
 		"prettier": "prettier --ignore-unknown --ignore-path=.gitignore --check .",
-		"prettier:format": "prettier --ignore-unknown --ignore-path=.gitignore --write .",
+		"prettier:fix": "prettier --ignore-unknown --ignore-path=.gitignore --write .",
 		"tsc": "tsc --noEmit",
 		"test": "vitest run",
 		"test:kill": "rm -rf .wrangler; sudo kill -9 `sudo lsof -i :8799 -t`",
