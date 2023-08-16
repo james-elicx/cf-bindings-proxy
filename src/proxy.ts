@@ -105,7 +105,8 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 	return new Proxy({ __bindingId: bindingId, __calls: [], __chainUntil: [] } as BindingRequest, {
 		get(target, prop: string) {
 			// internal properties
-			if (prop.startsWith('__')) return target[prop as keyof BindingRequest];
+			if (typeof prop === 'string' && prop.startsWith('__'))
+				return target[prop as keyof BindingRequest];
 			// ignore toJSON calls
 			if (prop === 'toJSON') return undefined;
 			if (notChainable) return undefined;
