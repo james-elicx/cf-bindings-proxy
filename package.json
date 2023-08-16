@@ -40,7 +40,7 @@
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.26.2",
-		"@cloudflare/workers-types": "^4.20230710.1",
+		"@cloudflare/workers-types": "^4.20230814.0",
 		"@tsconfig/strictest": "^2.0.1",
 		"@types/node": "^20.3.3",
 		"eslint": "^8.41.0",
@@ -55,7 +55,7 @@
 		"vite-plugin-externalize-deps": "^0.6.0",
 		"vitest": "^0.31.0",
 		"vitest-environment-miniflare": "^2.14.0",
-		"wrangler": "^3.0.0"
+		"wrangler": "^3.5.1"
 	},
 	"peerDependencies": {
 		"@cloudflare/workers-types": ">=4",

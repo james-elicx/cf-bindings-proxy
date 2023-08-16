@@ -63,7 +63,7 @@ suite('bindings', () => {
 		test('getWithMetadata', async () => {
 			const key = await binding<KVNamespace>('KV').getWithMetadata('first-key');
 
-			expect(key).toEqual({ metadata: null, value: 'first-value' });
+			expect(key).toEqual({ metadata: null, value: 'first-value', cacheStatus: null });
 		});
 
 		test('delete', async () => {
