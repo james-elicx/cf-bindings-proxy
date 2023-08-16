@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.2.7
+
+### Patch Changes
+
+- 84b0638: Symbol call throwing error due to prop check assuming string.
+
 ## 0.2.6
 
 ### Patch Changes
