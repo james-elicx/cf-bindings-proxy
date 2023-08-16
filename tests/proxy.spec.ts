@@ -352,4 +352,12 @@ suite('bindings', () => {
 			expect(list.objects.length).toEqual(0);
 		});
 	});
+
+	suite('other patches', () => {
+		test('Calling `binding()` with a Symbol should not throw error for `startsWith` check', () => {
+			const kv = binding<KVNamespace>('KV');
+			// @ts-expect-error - testing it doesn't throw an error, not that it works
+			expect(kv[Symbol.toStringTag]).toBeDefined();
+		});
+	});
 });
