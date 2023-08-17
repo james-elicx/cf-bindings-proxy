@@ -1,3 +1,4 @@
+import { HOST, PORT, PROTOCOL } from './constants';
 import { transformData } from './transform';
 
 export type BindingResponse =
@@ -13,7 +14,7 @@ export type BindingResponse =
 const fetchData = async (call: BindingRequest): Promise<unknown> => {
 	let resp: Response;
 	try {
-		resp = await fetch('http://127.0.0.1:8799', {
+		resp = await fetch(`${PROTOCOL}://${HOST}:${PORT}`, {
 			body: JSON.stringify(call),
 			method: 'POST',
 			cache: 'no-store',

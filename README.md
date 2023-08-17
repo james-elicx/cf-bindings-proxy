@@ -47,7 +47,7 @@ const value = await binding<KVNamespace>('MY_KV').get('key');
 
 ## How It Works
 
-Starting the proxy spawns an instance of Wrangler using a template, passing through any commands and bindings that are supplied to the CLI. It uses port `8799`.
+Starting the proxy spawns an instance of Wrangler using a template, passing through any commands and bindings that are supplied to the CLI. It uses port `8799` by default, but can be configured with the environment variable `BINDINGS_PROXY_PORT`.
 
 In development mode, when interacting with a binding through the `binding('BINDING_NAME')` function, it sends HTTP requests to the proxy. These HTTP requests contain destructured function calls, which are then reconstructed and executed inside the proxy. The result is then returned to the client.
 

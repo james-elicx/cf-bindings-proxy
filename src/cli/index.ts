@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PORT } from '../constants';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +40,14 @@ Please report any issues to https://github.com/james-elicx/cf-bindings-proxy
 
 	const wrangler = spawn(
 		executor,
-		['wrangler', 'pages', 'dev', resolve(__dirname, 'template'), '--port=8799', ...passThroughArgs],
+		[
+			'wrangler',
+			'pages',
+			'dev',
+			resolve(__dirname, 'template'),
+			`--port=${PORT}`,
+			...passThroughArgs,
+		],
 		{ stdio: 'inherit' },
 	);
 
