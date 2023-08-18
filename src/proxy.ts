@@ -26,7 +26,7 @@ const preparePropertyCallArg = async (
 				from: 'buffer',
 				to: 'base64',
 			}),
-			transform: { from: 'base64', to: 'buffer' },
+			transform: { from: 'base64', to: 'blob' },
 		};
 	}
 
