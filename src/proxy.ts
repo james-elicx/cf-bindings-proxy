@@ -80,10 +80,7 @@ const fetchData = async (call: BindingRequest): Promise<unknown> => {
 
 export type PropertyCall = {
 	prop: string;
-	args: (
-		| { data: unknown | BindingRequest[]; transform?: never }
-		| { data: unknown | BindingRequest[]; transform?: { from: string; to: string } }
-	)[];
+	args: { data: unknown | BindingRequest[]; transform?: { from: string; to: string } }[];
 };
 
 export type BindingRequest = {
