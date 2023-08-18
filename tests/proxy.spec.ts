@@ -226,7 +226,7 @@ suite('bindings', () => {
 	});
 
 	suite('r2', () => {
-		// TODO: writeHttpMetadata, put: non-string, uploadPart: non-string
+		// TODO: writeHttpMetadata, uploadPart: non-string
 
 		test('put -> string', async () => {
 			const firstFile = await binding<R2Bucket>('R2').put('first-key', 'first-value', {
