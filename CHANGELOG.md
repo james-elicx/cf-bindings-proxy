@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.2.8
+
+### Patch Changes
+
+- 705a99e: Make it possible to send an ArrayBuffer or a Blob
+
 ## 0.2.7
 
 ### Patch Changes
