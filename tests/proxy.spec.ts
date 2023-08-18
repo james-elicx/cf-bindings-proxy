@@ -226,15 +226,47 @@ suite('bindings', () => {
 	});
 
 	suite('r2', () => {
-		// TODO: writeHttpMetadata, put: non-string, uploadPart: non-string
+		// TODO: writeHttpMetadata, uploadPart: non-string
 
-		test('put', async () => {
+		test('put -> string', async () => {
 			const firstFile = await binding<R2Bucket>('R2').put('first-key', 'first-value', {
 				customMetadata: { source: 'test-suite', v: '1' },
 			});
 			const secondFile = await binding<R2Bucket>('R2').put('second-key', 'second-value', {
 				customMetadata: { source: 'test-suite', v: '2' },
 			});
+
+			expect(firstFile.key).toEqual('first-key');
+			expect(secondFile.key).toEqual('second-key');
+		});
+
+		test('put -> ArrayBuffer', async () => {
+			const firstFile = await binding<R2Bucket>('R2').put('first-key', new ArrayBuffer(1), {
+				customMetadata: { source: 'test-suite', v: '1' },
+			});
+			const secondFile = await binding<R2Bucket>('R2').put('second-key', new ArrayBuffer(1), {
+				customMetadata: { source: 'test-suite', v: '2' },
+			});
+
+			expect(firstFile.key).toEqual('first-key');
+			expect(secondFile.key).toEqual('second-key');
+		});
+
+		test('put -> Blob', async () => {
+			const firstFile = await binding<R2Bucket>('R2').put(
+				'first-key',
+				new Blob([new ArrayBuffer(1)]),
+				{
+					customMetadata: { source: 'test-suite', v: '1' },
+				},
+			);
+			const secondFile = await binding<R2Bucket>('R2').put(
+				'second-key',
+				new Blob([new ArrayBuffer(1)]),
+				{
+					customMetadata: { source: 'test-suite', v: '2' },
+				},
+			);
 
 			expect(firstFile.key).toEqual('first-key');
 			expect(secondFile.key).toEqual('second-key');

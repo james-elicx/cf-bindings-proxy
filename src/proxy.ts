@@ -5,6 +5,52 @@ export type BindingResponse =
 	| { success: true; data: unknown; transform?: { from: string; to: string } };
 
 /**
+ * Prepares the property call argument to be sent to the proxy.
+ * This will transform any `ArrayBuffer` or `Blob` to `base64` and add the `transform` property.
+ *
+ * @param arg
+ */
+const preparePropertyCallArg = async (
+	arg: PropertyCall['args'][0],
+): Promise<PropertyCall['args'][0]> => {
+	if (arg.data instanceof ArrayBuffer) {
+		return {
+			data: transformData(arg, { from: 'buffer', to: 'base64' }),
+			transform: { from: 'base64', to: 'buffer' },
+		};
+	}
+
+	if (arg.data instanceof Blob) {
+		return {
+			data: transformData(await arg.data.arrayBuffer(), {
+				from: 'buffer',
+				to: 'base64',
+			}),
+			transform: { from: 'base64', to: 'blob' },
+		};
+	}
+
+	return arg;
+};
+
+/**
+ * Prepares the binding request to be sent to the proxy.
+ *
+ * @param bindingRequest
+ */
+const prepareBindingRequest = async (bindingRequest: BindingRequest): Promise<BindingRequest> => {
+	return {
+		...bindingRequest,
+		__calls: await Promise.all(
+			bindingRequest.__calls.map(async (call) => ({
+				...call,
+				args: await Promise.all(call.args.map(preparePropertyCallArg)),
+			})),
+		),
+	};
+};
+
+/**
  * Fetches data from the binding proxy.
  *
  * @param call The call to make to the proxy.
@@ -14,7 +60,7 @@ const fetchData = async (call: BindingRequest): Promise<unknown> => {
 	let resp: Response;
 	try {
 		resp = await fetch('http://127.0.0.1:8799', {
-			body: JSON.stringify(call),
+			body: JSON.stringify(await prepareBindingRequest(call)),
 			method: 'POST',
 			cache: 'no-store',
 			headers: { 'Content-Type': 'application/json' },
@@ -32,7 +78,11 @@ const fetchData = async (call: BindingRequest): Promise<unknown> => {
 	return transform ? transformData(data, transform) : data;
 };
 
-export type PropertyCall = { prop: string; args: (unknown | BindingRequest[])[] };
+export type PropertyCall = {
+	prop: string;
+	args: { data: unknown | BindingRequest[]; transform?: { from: string; to: string } }[];
+};
+
 export type BindingRequest = {
 	__original_call?: BindingRequest;
 	__bindingId: string;
@@ -71,7 +121,7 @@ const createResponseProxy = <T extends object>(
 			newProxy.__original_call = originalProxy;
 
 			return async (...args: unknown[]) => {
-				newProxy.__calls.push({ prop: prop as string, args });
+				newProxy.__calls.push({ prop: prop as string, args: args.map((arg) => ({ data: arg })) });
 
 				return fetchData(newProxy);
 			};
@@ -125,13 +175,13 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 				newProxy.__calls = target.__calls;
 
 				return (...args: unknown[]) => {
-					target.__calls.push({ prop, args });
+					target.__calls.push({ prop, args: args.map((arg) => ({ data: arg })) });
 					return newProxy;
 				};
 			}
 
 			return async (...args: unknown[]) => {
-				target.__calls.push({ prop, args });
+				target.__calls.push({ prop, args: args.map((arg) => ({ data: arg })) });
 
 				const data = await fetchData(target);
 

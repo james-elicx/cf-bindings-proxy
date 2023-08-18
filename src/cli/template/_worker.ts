@@ -15,10 +15,15 @@ const reduceCalls = (callee: Env, callsToProcess: PropertyCall[]): unknown => {
 	return callsToProcess.reduce((acc, { prop, args }) => {
 		return acc[prop](
 			...args.map((arg) => {
-				if (Array.isArray(arg)) {
-					return arg.map((a) => ('__bindingId' in a ? reduceCalls(callee, a.__calls) : a));
+				if (Array.isArray(arg.data)) {
+					return arg.data.map((a) => ('__bindingId' in a ? reduceCalls(callee, a.__calls) : a));
 				}
-				return arg;
+
+				if (arg.transform) {
+					return transformData(arg.data, arg.transform);
+				}
+
+				return arg.data;
 			}),
 		);
 	}, callee);
