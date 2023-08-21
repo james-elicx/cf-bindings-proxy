@@ -45,13 +45,21 @@ import { binding } from 'cf-bindings-proxy';
 const value = await binding<KVNamespace>('MY_KV').get('key');
 ```
 
+It is also possible to specify a custom fallback for use in production instead of `process.env`.
+
+```ts
+import { binding } from 'cf-bindings-proxy';
+
+const value = await binding<KVNamespace>('MY_KV', { fallback: platform.env }).get('key');
+```
+
 ## How It Works
 
 Starting the proxy spawns an instance of Wrangler using a template, passing through any commands and bindings that are supplied to the CLI. It uses port `8799`.
 
 In development mode, when interacting with a binding through the `binding('BINDING_NAME')` function, it sends HTTP requests to the proxy. These HTTP requests contain destructured function calls, which are then reconstructed and executed inside the proxy. The result is then returned to the client.
 
-When building for production, `binding('BINDING_NAME')` simply calls `process.env.BINDING_NAME` to retrieve the binding instead.
+When building for production, `binding('BINDING_NAME')` simply calls `process.env.BINDING_NAME` to retrieve the binding instead. If you wish to use a custom fallback like `platform.env` instead of `process.env`, you can pass a custom fallback to the binding call with `binding('BINDING_NAME', { fallback: platform.env })`.
 
 ### When It's Active
 
