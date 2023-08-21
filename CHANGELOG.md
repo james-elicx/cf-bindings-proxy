@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.3.0
+
+### Minor Changes
+
+- 918bb55: Support for providing a custom fallback to use instead of `process.env`.
+
 ## 0.2.8
 
 ### Patch Changes
