@@ -31,7 +31,7 @@ export const binding = <T>(id: string, opts?: BindingOpts): T => {
 		) as T;
 	}
 
-	return (opts?.fallback ?? process?.env)[id] as T;
+	return (opts?.fallback ?? process?.env)?.[id] as T;
 };
 
 type BindingOpts = {
