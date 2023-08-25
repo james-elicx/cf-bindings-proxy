@@ -15,7 +15,7 @@ const preparePropertyCallArg = async (
 ): Promise<PropertyCall['args'][0]> => {
 	if (arg.data instanceof ArrayBuffer) {
 		return {
-			data: transformData(arg, { from: 'buffer', to: 'base64' }),
+			data: transformData(arg.data, { from: 'buffer', to: 'base64' }),
 			transform: { from: 'base64', to: 'buffer' },
 		};
 	}
