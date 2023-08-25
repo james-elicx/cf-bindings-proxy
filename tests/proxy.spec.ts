@@ -244,12 +244,15 @@ suite('bindings', () => {
 			const firstFile = await binding<R2Bucket>('R2').put('first-key', new ArrayBuffer(1), {
 				customMetadata: { source: 'test-suite', v: '1' },
 			});
-			const secondFile = await binding<R2Bucket>('R2').put('second-key', new ArrayBuffer(1), {
+			const secondFile = await binding<R2Bucket>('R2').put('second-key', new ArrayBuffer(2), {
 				customMetadata: { source: 'test-suite', v: '2' },
 			});
 
 			expect(firstFile.key).toEqual('first-key');
+			expect(firstFile.size).toEqual(1);
+
 			expect(secondFile.key).toEqual('second-key');
+			expect(secondFile.size).toEqual(2);
 		});
 
 		test('put -> Blob', async () => {
@@ -262,14 +265,17 @@ suite('bindings', () => {
 			);
 			const secondFile = await binding<R2Bucket>('R2').put(
 				'second-key',
-				new Blob([new ArrayBuffer(1)]),
+				new Blob([new ArrayBuffer(2)]),
 				{
 					customMetadata: { source: 'test-suite', v: '2' },
 				},
 			);
 
 			expect(firstFile.key).toEqual('first-key');
+			expect(firstFile.size).toEqual(1);
+
 			expect(secondFile.key).toEqual('second-key');
+			expect(secondFile.size).toEqual(2);
 		});
 
 		test('get', async () => {
