@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.3.1
+
+### Patch Changes
+
+- 803dd41: Fix the incorrect process of converting ArrayBuffer to base64
+
 ## 0.3.0
 
 ### Minor Changes
