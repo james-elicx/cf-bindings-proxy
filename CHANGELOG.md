@@ -1,5 +1,12 @@
 # cf-bindings-proxy
 
+## 0.3.2
+
+### Patch Changes
+
+- fc01172: Fix a maximum stack call exception from buffer -> base64 conversion
+- fc01172: Fix blob -> base64 call for the arraybuffer not being awaited.
+
 ## 0.3.1
 
 ### Patch Changes
