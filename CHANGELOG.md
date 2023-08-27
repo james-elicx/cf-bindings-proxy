@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.4.0
+
+### Minor Changes
+
+- 61d928a: Support for `writeHttpMetadata` for R2.
+
 ## 0.3.3
 
 ### Patch Changes
