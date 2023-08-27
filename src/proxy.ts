@@ -90,6 +90,21 @@ const createResponseProxy = <T extends object>(
 
 			if (['toJSON'].includes(prop as string)) return data;
 
+			// special handling for `writeHttpMetadata`
+			if (prop === 'writeHttpMetadata' && data && typeof data === 'object') {
+				// @ts-expect-error - this is fine
+				const metadata = (data.httpMetadata || {}) as R2HTTPMetadata;
+				return (headers: Headers) => {
+					if (metadata.cacheControl) headers.set('cache-control', metadata.cacheControl);
+					if (metadata.cacheExpiry) headers.set('expires', metadata.cacheExpiry.toUTCString());
+					if (metadata.contentDisposition)
+						headers.set('content-disposition', metadata.contentDisposition);
+					if (metadata.contentEncoding) headers.set('content-encoding', metadata.contentEncoding);
+					if (metadata.contentLanguage) headers.set('content-language', metadata.contentLanguage);
+					if (metadata.contentType) headers.set('content-type', metadata.contentType);
+				};
+			}
+
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			const newProxy = createBindingProxy<BindingRequest>(bindingId, true);
 

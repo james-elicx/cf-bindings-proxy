@@ -96,9 +96,9 @@ Note: Functionality and bindings not listed below may still work but have not be
 #### R2
 
 - [x] put
-  - [ ] writeHttpMetadata
+  - [x] writeHttpMetadata
 - [x] get
-  - [ ] writeHttpMetadata
+  - [x] writeHttpMetadata
   - [x] text
   - [x] json
   - [x] arrayBuffer
@@ -106,9 +106,9 @@ Note: Functionality and bindings not listed below may still work but have not be
   - [ ] body
   - [ ] bodyUsed
 - [x] head
-  - [ ] writeHttpMetadata
+  - [x] writeHttpMetadata
 - [x] list
-  - [ ] writeHttpMetadata
+  - [x] writeHttpMetadata
 - [x] delete
 - [ ] createMultipartUpload
 - [ ] resumeMultipartUpload
