@@ -1,5 +1,5 @@
 import type { BindingRequest, BindingResponse, PropertyCall } from '../../proxy';
-import { transformData } from '../../transform';
+import { prepareDataForProxy, transformData } from '../../transform';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Env = { [key: string]: any };
@@ -11,22 +11,26 @@ type Env = { [key: string]: any };
  * @param callsToProcess Function calls to process.
  * @returns The result of the function calls.
  */
-const reduceCalls = (callee: Env, callsToProcess: PropertyCall[]): unknown => {
-	return callsToProcess.reduce((acc, { prop, args }) => {
-		return acc[prop](
-			...args.map((arg) => {
-				if (Array.isArray(arg.data)) {
-					return arg.data.map((a) => ('__bindingId' in a ? reduceCalls(callee, a.__calls) : a));
-				}
+const reduceCalls = async (callee: Env, callsToProcess: PropertyCall[]): Promise<unknown> => {
+	return callsToProcess.reduce(async (acc, { prop, args }) => {
+		return (await acc)[prop](
+			...(await Promise.all(
+				args.map(async (arg) => {
+					if (Array.isArray(arg.data)) {
+						return Promise.all(
+							arg.data.map((a) => ('__bindingId' in a ? reduceCalls(callee, a.__calls) : a)),
+						);
+					}
 
-				if (arg.transform) {
-					return transformData(arg.data, arg.transform);
-				}
+					if (arg.transform) {
+						return transformData(arg.data, arg.transform);
+					}
 
-				return arg.data;
-			}),
+					return arg.data;
+				}),
+			)),
 		);
-	}, callee);
+	}, Promise.resolve(callee));
 };
 
 export default {
@@ -47,13 +51,9 @@ export default {
 			const resp: BindingResponse = { success: true, data: rawData };
 
 			if (resp.success) {
-				if (rawData instanceof ArrayBuffer) {
-					resp.transform = { from: 'base64', to: 'buffer' };
-					resp.data = transformData(rawData, { from: 'buffer', to: 'base64' });
-				} else if (rawData instanceof Blob) {
-					resp.transform = { from: 'base64', to: 'blob' };
-					resp.data = transformData(await rawData.arrayBuffer(), { from: 'buffer', to: 'base64' });
-				}
+				const transformedResp = await prepareDataForProxy(rawData, { data: rawData });
+				resp.transform = transformedResp.transform;
+				resp.data = transformedResp.data;
 			}
 
 			return new Response(JSON.stringify(resp), {

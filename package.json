@@ -55,7 +55,7 @@
 		"vite-plugin-externalize-deps": "^0.6.0",
 		"vitest": "^0.31.0",
 		"vitest-environment-miniflare": "^2.14.0",
-		"wrangler": "^3.5.1"
+		"wrangler": "^3.6.0"
 	},
 	"peerDependencies": {
 		"@cloudflare/workers-types": ">=4",
