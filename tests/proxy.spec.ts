@@ -226,7 +226,7 @@ suite('bindings', () => {
 	});
 
 	suite('r2', () => {
-		// TODO: writeHttpMetadata, uploadPart: non-string
+		// TODO: uploadPart: non-string
 
 		test('put -> string', async () => {
 			const firstFile = await binding<R2Bucket>('R2').put('first-key', 'first-value', {
@@ -310,6 +310,18 @@ suite('bindings', () => {
 			const blob = await value?.blob();
 			expect(blob).toBeInstanceOf(Blob);
 			expect(await blob?.text()).toEqual(JSON.stringify({ value: 'test' }));
+		});
+
+		test('get -> writeHttpMetadata', async () => {
+			await binding<R2Bucket>('R2').put('json-key', JSON.stringify({ value: 'test' }), {
+				httpMetadata: { contentType: 'application/json' },
+			});
+			const value = await binding<R2Bucket>('R2').get('json-key');
+
+			const headers = new Headers();
+			value?.writeHttpMetadata(headers);
+
+			expect(headers.get('content-type')).toEqual('application/json');
 		});
 
 		test('list', async () => {
