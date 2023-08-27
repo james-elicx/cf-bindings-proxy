@@ -1,37 +1,8 @@
-import { transformData } from './transform';
+import { prepareDataForProxy, transformData } from './transform';
 
 export type BindingResponse =
 	| { success: false; data: string; transform?: never }
 	| { success: true; data: unknown; transform?: { from: string; to: string } };
-
-/**
- * Prepares the property call argument to be sent to the proxy.
- * This will transform any `ArrayBuffer` or `Blob` to `base64` and add the `transform` property.
- *
- * @param arg
- */
-const preparePropertyCallArg = async (
-	arg: PropertyCall['args'][0],
-): Promise<PropertyCall['args'][0]> => {
-	if (arg.data instanceof ArrayBuffer) {
-		return {
-			data: transformData(arg.data, { from: 'buffer', to: 'base64' }),
-			transform: { from: 'base64', to: 'buffer' },
-		};
-	}
-
-	if (arg.data instanceof Blob) {
-		return {
-			data: transformData(await arg.data.arrayBuffer(), {
-				from: 'buffer',
-				to: 'base64',
-			}),
-			transform: { from: 'base64', to: 'blob' },
-		};
-	}
-
-	return arg;
-};
 
 /**
  * Prepares the binding request to be sent to the proxy.
@@ -44,7 +15,7 @@ const prepareBindingRequest = async (bindingRequest: BindingRequest): Promise<Bi
 		__calls: await Promise.all(
 			bindingRequest.__calls.map(async (call) => ({
 				...call,
-				args: await Promise.all(call.args.map(preparePropertyCallArg)),
+				args: await Promise.all(call.args.map((arg) => prepareDataForProxy(arg.data, arg))),
 			})),
 		),
 	};
@@ -57,10 +28,12 @@ const prepareBindingRequest = async (bindingRequest: BindingRequest): Promise<Bi
  * @returns The data returned from the proxy.
  */
 const fetchData = async (call: BindingRequest): Promise<unknown> => {
+	const preparedCall = await prepareBindingRequest(call);
+
 	let resp: Response;
 	try {
 		resp = await fetch('http://127.0.0.1:8799', {
-			body: JSON.stringify(await prepareBindingRequest(call)),
+			body: JSON.stringify(preparedCall),
 			method: 'POST',
 			cache: 'no-store',
 			headers: { 'Content-Type': 'application/json' },
