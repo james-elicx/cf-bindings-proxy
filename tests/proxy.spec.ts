@@ -320,6 +320,8 @@ suite('bindings', () => {
 				{ key: 'json-key' },
 				{ key: 'second-key' },
 			]);
+
+			expect(JSON.stringify(list.truncated)).toEqual('false');
 		});
 
 		test('head', async () => {
