@@ -88,6 +88,8 @@ const createResponseProxy = <T extends object>(
 				return data[Number(prop)];
 			}
 
+			if (['toJSON'].includes(prop as string)) return data;
+
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			const newProxy = createBindingProxy<BindingRequest>(bindingId, true);
 
