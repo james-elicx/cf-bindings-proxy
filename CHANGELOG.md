@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.4.1
+
+### Patch Changes
+
+- ab73898: Fixes returning a binding through an awaited function calling `.then` on `binding(...)` and throwing an error.
+
 ## 0.4.0
 
 ### Minor Changes
