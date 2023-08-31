@@ -150,6 +150,8 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 			// ignore toJSON calls
 			if (prop === 'toJSON') return undefined;
 			if (notChainable) return undefined;
+			// ignore then calls if there are no calls yet
+			if (target.__calls.length === 0 && prop === 'then') return undefined;
 
 			// decide if we should chain until a certain point for this call
 			if (!target.__chainUntil.length) {
