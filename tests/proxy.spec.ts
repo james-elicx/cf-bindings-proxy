@@ -411,5 +411,11 @@ suite('bindings', () => {
 			// @ts-expect-error - testing it doesn't throw an error, not that it works
 			expect(kv[Symbol.toStringTag]).toBeDefined();
 		});
+
+		test('Returning binding from awaited function should not try to call `then`', async () => {
+			const getBinding = async () => binding<KVNamespace>('KV');
+			const kv = await getBinding();
+			expect(kv).toBeDefined();
+		});
 	});
 });
