@@ -118,8 +118,10 @@ suite('bindings', () => {
 
 			const statements = insertQuery.map((query) => d1.prepare(query).bind('hello-world'));
 
-			const result = await d1.batch(statements);
-			expect(result.map((r) => r.success)).toEqual([true, true]);
+			const [insert1, insert2] = await d1.batch(statements);
+
+			expect(insert1?.success).toEqual(true);
+			expect(insert2?.success).toEqual(true);
 		});
 
 		test('prepare -> bind -> all (select)', async () => {

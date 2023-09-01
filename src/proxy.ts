@@ -241,6 +241,10 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 					return data;
 				}
 
+				if (Array.isArray(data)) {
+					return data;
+				}
+
 				return createResponseProxy(bindingId, target, data);
 			};
 		},
