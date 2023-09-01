@@ -1,5 +1,16 @@
 # cf-bindings-proxy
 
+## 0.5.0
+
+### Minor Changes
+
+- d87efba: Support for ReadableStream with R2 `.put(...)`, and `.get(...).body`.
+- d87efba: Transforms functions from responses when making calls in the proxy, instead of needing further HTTP calls to read their value. Support for handling binding calls that return accessors for `arrayBuffer()`, `blob()`, `text()`, `json()`, `body` + `bodyUsed`.
+
+### Patch Changes
+
+- 7b0d1ae: Return array responses instead of creating a new proxy for the response.
+
 ## 0.4.1
 
 ### Patch Changes
