@@ -45,6 +45,9 @@ export default defineConfig({
 	],
 	test: {
 		environment: 'miniflare',
+		environmentOptions: {
+			compatibilityDate: '2023-09-01',
+		},
 		setupFiles: [resolve('tests', 'setup.ts')],
 	},
 });

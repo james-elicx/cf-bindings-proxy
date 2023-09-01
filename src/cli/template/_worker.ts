@@ -1,4 +1,5 @@
 import type { BindingRequest, BindingResponse, PropertyCall } from '../../proxy';
+import type { FunctionInfo, TransformRule } from '../../transform';
 import { prepareDataForProxy, transformData } from '../../transform';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,11 +23,8 @@ const reduceCalls = async (callee: Env, callsToProcess: PropertyCall[]): Promise
 						);
 					}
 
-					if (arg.transform) {
-						return transformData(arg.data, arg.transform);
-					}
-
-					return arg.data;
+					// @ts-expect-error - We don't know the type of the data.
+					return arg.transform ? transformData(arg.data, arg.transform) : arg.data;
 				}),
 			)),
 		);
@@ -48,12 +46,56 @@ export default {
 				: env[__bindingId];
 
 			const rawData = await reduceCalls(callee, __calls);
-			const resp: BindingResponse = { success: true, data: rawData };
+			const resp: BindingResponse = { success: true, data: rawData, functions: {} };
 
 			if (resp.success) {
 				const transformedResp = await prepareDataForProxy(rawData, { data: rawData });
 				resp.transform = transformedResp.transform;
 				resp.data = transformedResp.data;
+
+				if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) {
+					// resp.arrayBuffer() => Promise<ArrayBuffer>
+					if ('arrayBuffer' in rawData && typeof rawData.arrayBuffer === 'function') {
+						const buffer = await rawData.arrayBuffer();
+						resp.functions.arrayBuffer = (await prepareDataForProxy(buffer, {
+							data: buffer,
+						})) as FunctionInfo<TransformRule<'buffer', 'base64'>>;
+					}
+
+					// NOTE: We can assume that we always have an arrayBuffer if we have any of the following.
+
+					// resp.blob() => Promise<Blob>
+					if ('blob' in rawData && typeof rawData.blob === 'function') {
+						resp.functions.blob = {
+							takeDataFrom: 'arrayBuffer',
+							transform: { from: 'buffer', to: 'blob' },
+						};
+					}
+
+					// resp.text() => Promise<string>
+					if ('text' in rawData && typeof rawData.text === 'function') {
+						resp.functions.text = {
+							takeDataFrom: 'arrayBuffer',
+							transform: { from: 'buffer', to: 'text' },
+						};
+					}
+
+					// resp.json<T>() => Promise<T>
+					if ('json' in rawData && typeof rawData.json === 'function') {
+						resp.functions.json = {
+							takeDataFrom: 'arrayBuffer',
+							transform: { from: 'buffer', to: 'json' },
+						};
+					}
+
+					// resp.body => ReadableStream
+					if ('body' in rawData && typeof rawData.body === 'object') {
+						resp.functions.body = {
+							takeDataFrom: 'arrayBuffer',
+							asAccessor: true,
+						};
+					}
+				}
 			}
 
 			return new Response(JSON.stringify(resp), {

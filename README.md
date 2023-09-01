@@ -97,18 +97,22 @@ Note: Functionality and bindings not listed below may still work but have not be
 
 - [x] put
   - [x] writeHttpMetadata
+  - [x] _value type_: ArrayBuffer
+  - [x] _value type_: string
+  - [x] _value type_: Blob
+  - [x] _value type_: ReadableStream
 - [x] get
   - [x] writeHttpMetadata
   - [x] text
   - [x] json
   - [x] arrayBuffer
   - [x] blob
-  - [ ] body
-  - [ ] bodyUsed
+  - [x] body
+  - [x] bodyUsed
 - [x] head
   - [x] writeHttpMetadata
 - [x] list
   - [x] writeHttpMetadata
 - [x] delete
-- [ ] createMultipartUpload
-- [ ] resumeMultipartUpload
+- [ ] createMultipartUpload (needs more tests)
+- [ ] resumeMultipartUpload (needs more tests)
