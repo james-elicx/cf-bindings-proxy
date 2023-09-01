@@ -15,7 +15,8 @@ suite('bindings', () => {
 		worker = await unstable_dev(resolve('src/cli/template/_worker.ts'), {
 			// logLevel: 'debug',
 			port: 8799,
-			compatibilityDate: '2023-05-22',
+			compatibilityDate: '2023-09-01',
+			// compatibilityFlags: ['streams_enable_constructors'],
 			experimental: {
 				disableExperimentalWarning: true,
 				d1Databases: [{ binding: 'D1', database_name: 'test_db', database_id: 'test_db' }],
@@ -259,16 +260,41 @@ suite('bindings', () => {
 			const firstFile = await binding<R2Bucket>('R2').put(
 				'first-key',
 				new Blob([new ArrayBuffer(1)]),
-				{
-					customMetadata: { source: 'test-suite', v: '1' },
-				},
+				{ customMetadata: { source: 'test-suite', v: '1' } },
 			);
 			const secondFile = await binding<R2Bucket>('R2').put(
 				'second-key',
 				new Blob([new ArrayBuffer(2)]),
-				{
-					customMetadata: { source: 'test-suite', v: '2' },
-				},
+				{ customMetadata: { source: 'test-suite', v: '2' } },
+			);
+
+			expect(firstFile.key).toEqual('first-key');
+			expect(firstFile.size).toEqual(1);
+
+			expect(secondFile.key).toEqual('second-key');
+			expect(secondFile.size).toEqual(2);
+		});
+
+		test('put -> ReadableStream', async () => {
+			const firstFile = await binding<R2Bucket>('R2').put(
+				'first-key',
+				new ReadableStream({
+					start(controller) {
+						controller.enqueue(new ArrayBuffer(1));
+						controller.close();
+					},
+				}),
+				{ customMetadata: { source: 'test-suite', v: '1' } },
+			);
+			const secondFile = await binding<R2Bucket>('R2').put(
+				'second-key',
+				new ReadableStream({
+					start(controller) {
+						controller.enqueue(new ArrayBuffer(2));
+						controller.close();
+					},
+				}),
+				{ customMetadata: { source: 'test-suite', v: '2' } },
 			);
 
 			expect(firstFile.key).toEqual('first-key');
@@ -294,22 +320,35 @@ suite('bindings', () => {
 			});
 		});
 
-		test('get -> read value (text/json/arraybuffer/blob)', async () => {
+		test('get -> read value (text/json/arraybuffer/blob/body/bodyUsed)', async () => {
 			await binding<R2Bucket>('R2').put('json-key', JSON.stringify({ value: 'test' }));
 			const value = await binding<R2Bucket>('R2').get('json-key');
 
 			expect(await value?.text()).toEqual(JSON.stringify({ value: 'test' }));
 			expect(await value?.json()).toEqual({ value: 'test' });
 
+			// .arrayBuffer() => ArrayBuffer
 			const buffer = await value?.arrayBuffer();
 			expect(buffer).toBeInstanceOf(ArrayBuffer);
 			expect(Buffer.from(buffer as ArrayBuffer).toString()).toEqual(
 				JSON.stringify({ value: 'test' }),
 			);
 
+			// .blob() => Blob
 			const blob = await value?.blob();
 			expect(blob).toBeInstanceOf(Blob);
 			expect(await blob?.text()).toEqual(JSON.stringify({ value: 'test' }));
+
+			// .body => ReadableStream, .bodyUsed => boolean
+			const body = value?.body;
+			expect(body).toBeInstanceOf(ReadableStream);
+
+			expect(value?.bodyUsed).toEqual(false);
+			const bodyValue = await body?.getReader().read();
+			expect(value?.bodyUsed).toEqual(true);
+
+			expect(bodyValue?.value).toBeInstanceOf(ArrayBuffer);
+			expect(Buffer.from(bodyValue?.value).toString()).toEqual(JSON.stringify({ value: 'test' }));
 		});
 
 		test('get -> writeHttpMetadata', async () => {

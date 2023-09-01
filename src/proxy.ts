@@ -1,8 +1,14 @@
-import { prepareDataForProxy, transformData } from './transform';
+import type { FunctionInfo, Functions, ParseType, TransformRule } from './transform';
+import { prepareDataForProxy, transformData, transformFunctionInfo } from './transform';
 
 export type BindingResponse =
-	| { success: false; data: string; transform?: never }
-	| { success: true; data: unknown; transform?: { from: string; to: string } };
+	| { success: false; data: string; transform?: never; functions?: never }
+	| {
+			success: true;
+			data: unknown;
+			transform?: TransformRule;
+			functions: { [key in Functions]?: FunctionInfo };
+	  };
 
 /**
  * Prepares the binding request to be sent to the proxy.
@@ -29,11 +35,12 @@ const prepareBindingRequest = async (bindingRequest: BindingRequest): Promise<Bi
  */
 const fetchData = async (call: BindingRequest): Promise<unknown> => {
 	const preparedCall = await prepareBindingRequest(call);
+	const stringifiedCall = JSON.stringify(preparedCall);
 
 	let resp: Response;
 	try {
 		resp = await fetch('http://127.0.0.1:8799', {
-			body: JSON.stringify(preparedCall),
+			body: stringifiedCall,
 			method: 'POST',
 			cache: 'no-store',
 			headers: { 'Content-Type': 'application/json' },
@@ -42,19 +49,72 @@ const fetchData = async (call: BindingRequest): Promise<unknown> => {
 		throw new Error('Unable to connect to binding proxy');
 	}
 
-	const { success, data, transform } = await resp.json<BindingResponse>();
+	const { success, data, transform, functions } = await resp.json<BindingResponse>();
 
 	if (!success) {
 		throw new Error(data || 'Bad response from binding proxy');
 	}
 
-	return transform ? transformData(data, transform) : data;
+	// @ts-expect-error - We don't know the type of the data.
+	const finalData = transform ? transformData(data, transform) : data;
+
+	if (functions && finalData && typeof finalData === 'object' && !Array.isArray(finalData)) {
+		for (const [key, fnInfo] of Object.entries(functions)) {
+			const transformFn = await transformFunctionInfo(fnInfo, functions);
+
+			if (fnInfo.asAccessor) {
+				const value =
+					typeof transformFn === 'function' && !(transformFn instanceof Blob)
+						? await transformFn()
+						: transformFn;
+
+				if (key === 'body') {
+					const body = new ReadableStream({
+						start(controller) {
+							controller.enqueue(value);
+							controller.close();
+						},
+					});
+
+					Object.defineProperties(finalData, {
+						body: {
+							get() {
+								return body;
+							},
+						},
+						bodyUsed: {
+							get() {
+								return body.locked;
+							},
+						},
+					});
+				} else {
+					Object.defineProperty(finalData, key, {
+						get() {
+							return value;
+						},
+					});
+				}
+			} else {
+				// @ts-expect-error - this should be fine
+				finalData[key] = transformFn;
+			}
+		}
+	}
+
+	return finalData;
 };
 
-export type PropertyCall = {
-	prop: string;
-	args: { data: unknown | BindingRequest[]; transform?: { from: string; to: string } }[];
-};
+export type PropertyCall<Transform extends TransformRule | undefined = TransformRule | undefined> =
+	{
+		prop: string;
+		args: {
+			data:
+				| (Transform extends TransformRule ? ParseType<Transform['from']> : unknown)
+				| BindingRequest[];
+			transform?: Transform;
+		}[];
+	};
 
 export type BindingRequest = {
 	__original_call?: BindingRequest;
