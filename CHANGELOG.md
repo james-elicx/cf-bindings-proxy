@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.7.0
+
+### Minor Changes
+
+- 906b21f: Support for the Cache API, as well as support for transforming Request / Response / URL objects.
+
 ## 0.5.0
 
 ### Minor Changes
