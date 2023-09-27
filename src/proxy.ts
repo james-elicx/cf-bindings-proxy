@@ -13,7 +13,7 @@ export type BindingResponse =
 /**
  * Prepares the binding request to be sent to the proxy.
  *
- * @param bindingRequest
+ * @param bindingRequest The binding request to prepare.
  */
 const prepareBindingRequest = async (bindingRequest: BindingRequest): Promise<BindingRequest> => {
 	return {
@@ -116,8 +116,11 @@ export type PropertyCall<Transform extends TransformRule | undefined = Transform
 		}[];
 	};
 
+export type ProxyType = 'binding' | 'caches';
+
 export type BindingRequest = {
 	__original_call?: BindingRequest;
+	__proxyType: ProxyType;
 	__bindingId: string;
 	__calls: PropertyCall[];
 	__chainUntil: string[];
@@ -132,6 +135,7 @@ export type BindingRequest = {
  * @returns A proxy object.
  */
 const createResponseProxy = <T extends object>(
+	proxyType: ProxyType,
 	bindingId: string,
 	originalProxy: BindingRequest,
 	data: T,
@@ -166,7 +170,10 @@ const createResponseProxy = <T extends object>(
 			}
 
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
-			const newProxy = createBindingProxy<BindingRequest>(bindingId, true);
+			const newProxy = createBindingProxy<BindingRequest>(bindingId, {
+				notChainable: true,
+				proxyType,
+			});
 
 			newProxy.__original_call = originalProxy;
 
@@ -194,6 +201,11 @@ const shouldChainUntil = (prop: string): string[] => {
 	return [];
 };
 
+const buildDefaultBindingRequest = (__proxyType: ProxyType, __bindingId: string) =>
+	({ __proxyType, __bindingId, __calls: [], __chainUntil: [] } as BindingRequest);
+
+type CreateBindingOpts = { notChainable?: boolean; proxyType?: ProxyType };
+
 /**
  * Creates a proxy object for the binding.
  *
@@ -201,14 +213,18 @@ const shouldChainUntil = (prop: string): string[] => {
  * @param notChainable Whether or not the proxy should be chainable.
  * @returns A proxy object.
  */
-export const createBindingProxy = <T>(bindingId: string, notChainable = false): T => {
-	return new Proxy({ __bindingId: bindingId, __calls: [], __chainUntil: [] } as BindingRequest, {
+export const createBindingProxy = <T>(
+	bindingId: string,
+	{ notChainable = false, proxyType = 'binding' }: CreateBindingOpts = {},
+): T => {
+	return new Proxy(buildDefaultBindingRequest(proxyType, bindingId), {
 		get(target, prop: string) {
 			// internal properties
 			if (typeof prop === 'string' && prop.startsWith('__'))
 				return target[prop as keyof BindingRequest];
 			// ignore toJSON calls
 			if (prop === 'toJSON') return undefined;
+			// if the current proxy is not chainable, ignore calls
 			if (notChainable) return undefined;
 			// ignore then calls if there are no calls yet
 			if (target.__calls.length === 0 && prop === 'then') return undefined;
@@ -221,7 +237,7 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 
 			// if we haven't reached the point where we should stop chaining, return a new proxy
 			if (target.__chainUntil.length && !target.__chainUntil.includes(prop)) {
-				const newProxy = createBindingProxy<BindingRequest>(bindingId);
+				const newProxy = createBindingProxy<BindingRequest>(bindingId, { proxyType });
 
 				newProxy.__chainUntil = target.__chainUntil;
 				newProxy.__calls = target.__calls;
@@ -237,15 +253,16 @@ export const createBindingProxy = <T>(bindingId: string, notChainable = false): 
 
 				const data = await fetchData(target);
 
-				if (typeof data !== 'object' || !data) {
+				if (
+					typeof data !== 'object' ||
+					!data ||
+					Array.isArray(data) ||
+					[URL, Request, Response].find((t) => data instanceof t)
+				) {
 					return data;
 				}
 
-				if (Array.isArray(data)) {
-					return data;
-				}
-
-				return createResponseProxy(bindingId, target, data);
+				return createResponseProxy(proxyType, bindingId, target, data);
 			};
 		},
 	}) as T;

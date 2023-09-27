@@ -116,3 +116,9 @@ Note: Functionality and bindings not listed below may still work but have not be
 - [x] delete
 - [ ] createMultipartUpload (needs more tests)
 - [ ] resumeMultipartUpload (needs more tests)
+
+#### Cache API
+
+- [x] put
+- [x] match
+- [x] delete
