@@ -47,7 +47,28 @@ export const binding = <T>(id: string, opts?: BindingOpts): T => {
 
 type DeriveCacheReturnType<T> = T extends 'default' | undefined ? Cache : Promise<Cache>;
 
-export const cacheApi = <T extends string | undefined>(cacheName?: T): DeriveCacheReturnType<T> => {
+/**
+ * Interfaces with the Cloudflare Cache API.
+ *
+ * By default, the `default` cache is used, however, a custom cache can be provided by passing a
+ * cache name as the first argument.
+ *
+ * @example
+ * ```ts
+ * const value = await cacheApi().put(..., ...);
+ * ```
+ *
+ * @example
+ * ```ts
+ * const value = await cacheApi('custom').put(..., ...);
+ * ```
+ *
+ * @param cacheName Name of the cache to open, or `undefined` to open the default cache.
+ * @returns Cache instance.
+ */
+export const cacheApi = <T extends string | undefined = undefined>(
+	cacheName?: T,
+): DeriveCacheReturnType<T> => {
 	if (isProxyEnabled()) {
 		return new Proxy(
 			{},

@@ -474,18 +474,16 @@ suite('bindings', () => {
 		const parseRes = async (res: MaybePromise<CfResponse | undefined>) => (await res)?.text();
 
 		test('default cache -> put/match/delete', async () => {
-			const defaultCache = cacheApi('default');
-
 			const firstKey = buildUrl('first-key');
-			await defaultCache.put(firstKey, buildRes('first-value'));
+			await cacheApi('default').put(firstKey, buildRes('first-value'));
 
-			const firstValue = await parseRes(defaultCache.match(firstKey));
+			const firstValue = await parseRes(cacheApi('default').match(firstKey));
 			expect(firstValue).toEqual('first-value');
 
-			const isDeleted = await defaultCache.delete(firstKey);
+			const isDeleted = await cacheApi().delete(firstKey);
 			expect(isDeleted).toEqual(true);
 
-			const firstValueAfterDelete = await parseRes(defaultCache.match(firstKey));
+			const firstValueAfterDelete = await parseRes(cacheApi().match(firstKey));
 			expect(firstValueAfterDelete).toEqual(undefined);
 		});
 
