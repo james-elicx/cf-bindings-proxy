@@ -1,11 +1,14 @@
 import { resolve } from 'path';
+import type { Response as CfResponse, Request as CfRequest } from '@cloudflare/workers-types';
 import type { ColumnType, Generated } from 'kysely';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
 import { afterAll, beforeAll, expect, suite, test } from 'vitest';
 import type { UnstableDevWorker } from 'wrangler';
 import { unstable_dev } from 'wrangler';
-import { binding } from '../src';
+import { binding, cacheApi } from '../src';
+
+type MaybePromise<T> = Promise<T> | T;
 
 suite('bindings', () => {
 	let worker: UnstableDevWorker;
@@ -457,6 +460,47 @@ suite('bindings', () => {
 			const getBinding = async () => binding<KVNamespace>('KV');
 			const kv = await getBinding();
 			expect(kv).toBeDefined();
+		});
+	});
+
+	suite('cache api', () => {
+		const buildUrl = (path: string) => new URL(path, 'http://localhost.local');
+		const buildReq = (url: string | URL) => new Request(url) as unknown as CfRequest;
+		const buildRes = (body: string) =>
+			new Response(body, {
+				status: 200,
+				headers: new Headers({ 'cache-control': 'max-age=31536000' }),
+			}) as unknown as CfResponse;
+		const parseRes = async (res: MaybePromise<CfResponse | undefined>) => (await res)?.text();
+
+		test('default cache -> put/match/delete', async () => {
+			const firstKey = buildUrl('first-key');
+			await cacheApi('default').put(firstKey, buildRes('first-value'));
+
+			const firstValue = await parseRes(cacheApi('default').match(firstKey));
+			expect(firstValue).toEqual('first-value');
+
+			const isDeleted = await cacheApi().delete(firstKey);
+			expect(isDeleted).toEqual(true);
+
+			const firstValueAfterDelete = await parseRes(cacheApi().match(firstKey));
+			expect(firstValueAfterDelete).toEqual(undefined);
+		});
+
+		test('custom cache -> put/match/delete', async () => {
+			const defaultCache = await cacheApi('custom');
+
+			const firstKey = buildReq(buildUrl('first-key'));
+			await defaultCache.put(firstKey, buildRes('first-value'));
+
+			const firstValue = await parseRes(defaultCache.match(firstKey));
+			expect(firstValue).toEqual('first-value');
+
+			const isDeleted = await defaultCache.delete(firstKey);
+			expect(isDeleted).toEqual(true);
+
+			const firstValueAfterDelete = await parseRes(defaultCache.match(firstKey));
+			expect(firstValueAfterDelete).toEqual(undefined);
 		});
 	});
 });

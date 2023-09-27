@@ -1,3 +1,4 @@
+import type { CacheStorage } from '@cloudflare/workers-types';
 import type { BindingRequest, BindingResponse, PropertyCall } from '../../proxy';
 import type { FunctionInfo, TransformRule } from '../../transform';
 import { prepareDataForProxy, transformData } from '../../transform';
@@ -39,11 +40,28 @@ export default {
 
 		try {
 			// eslint-disable-next-line @typescript-eslint/naming-convention
-			const { __original_call, __bindingId, __calls } = await request.json<BindingRequest>();
+			const { __original_call, __proxyType, __bindingId, __calls } =
+				await request.json<BindingRequest>();
 
-			const callee = __original_call
-				? await reduceCalls(env[__original_call.__bindingId], __original_call.__calls)
-				: env[__bindingId];
+			const baseId = __original_call ? __original_call.__bindingId : __bindingId;
+
+			let base;
+			switch (__proxyType) {
+				case 'caches': {
+					const asCacheStorage = caches as unknown as CacheStorage;
+					base = baseId === 'default' ? asCacheStorage.default : await asCacheStorage.open(baseId);
+					break;
+				}
+				case 'binding': {
+					base = env[baseId];
+					break;
+				}
+				default: {
+					throw new Error('Unknown proxy type');
+				}
+			}
+
+			const callee = __original_call ? await reduceCalls(base, __original_call.__calls) : base;
 
 			const rawData = await reduceCalls(callee, __calls);
 			const resp: BindingResponse = { success: true, data: rawData, functions: {} };
@@ -53,7 +71,12 @@ export default {
 				resp.transform = transformedResp.transform;
 				resp.data = transformedResp.data;
 
-				if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) {
+				if (
+					rawData &&
+					typeof rawData === 'object' &&
+					!Array.isArray(rawData) &&
+					![Response, Request, URL].find((t) => rawData instanceof t)
+				) {
 					// resp.arrayBuffer() => Promise<ArrayBuffer>
 					if ('arrayBuffer' in rawData && typeof rawData.arrayBuffer === 'function') {
 						const buffer = await rawData.arrayBuffer();
