@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.7.1
+
+### Patch Changes
+
+- d2cc335: Check process is not undefined when checking whether to use the binding or not.
+
 ## 0.7.0
 
 ### Minor Changes
