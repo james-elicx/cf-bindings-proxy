@@ -11,8 +11,9 @@ import { createBindingProxy } from './proxy';
  * `true`.
  * */
 export const isProxyEnabled = () =>
-	process?.env?.ENABLE_BINDINGS_PROXY ||
-	(!process?.env?.DISABLE_BINDINGS_PROXY && process?.env?.NODE_ENV === 'development');
+	typeof process !== 'undefined' &&
+	(process?.env?.ENABLE_BINDINGS_PROXY ||
+		(!process?.env?.DISABLE_BINDINGS_PROXY && process?.env?.NODE_ENV === 'development'));
 
 /**
  * Interfaces with a binding from the environment.
