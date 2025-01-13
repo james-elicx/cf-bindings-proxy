@@ -1,5 +1,11 @@
 # cf-bindings-proxy
 
+## 0.7.2
+
+### Patch Changes
+
+- 8027461: Pass `shell: true` to `spawn(...)`
+
 ## 0.7.1
 
 ### Patch Changes
