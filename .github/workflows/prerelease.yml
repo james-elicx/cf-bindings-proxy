@@ -43,7 +43,7 @@ jobs:
           cd ..
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: npm-package-cf-bindings-proxy-${{ github.event.number }} # encode the PR number into the artifact name
           path: dist/cf-bindings-proxy-*.tgz
